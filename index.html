@@ -40,16 +40,35 @@
       display: flex; align-items: center; justify-content: space-between;
       padding: 0 32px;
       z-index: 200;
-      mix-blend-mode: normal;
     }
     .nav-logo {
       font-family: var(--sans); font-size: 0.83rem;
       font-weight: 400; letter-spacing: 0.01em;
       cursor: pointer; color: var(--black);
       transition: color 0.3s;
+      display: flex; align-items: center; gap: 10px;
     }
     nav.light .nav-logo,
     nav.light .nav-link { color: #fff; }
+
+    /* LOGO: transparent background, multiply blend */
+    .logo-img {
+      width: 38px; height: 38px;
+      object-fit: contain; flex-shrink: 0;
+      transition: filter 0.3s;
+      /* transparent bg via mix-blend on dark bg, invert on light */
+      mix-blend-mode: multiply;
+      background: transparent;
+    }
+    nav.light .logo-img {
+      filter: brightness(0) invert(1);
+      opacity: 0.9;
+      mix-blend-mode: normal;
+    }
+    .logo-words { display: flex; flex-direction: column; line-height: 1.15; }
+    .logo-words .logo-top { font-size: 0.6rem; font-weight: 300; letter-spacing: 0.26em; text-transform: uppercase; color: var(--grey); transition: color 0.3s; }
+    .logo-words .logo-bot { font-size: 0.85rem; font-weight: 400; letter-spacing: 0.04em; color: var(--black); transition: color 0.3s; }
+    nav.light .logo-words .logo-top, nav.light .logo-words .logo-bot { color: rgba(255,255,255,0.88); }
 
     .nav-links { display: flex; gap: 28px; align-items: center; }
     .nav-link {
@@ -230,18 +249,87 @@
       background: var(--white);
       overflow: hidden;
       cursor: pointer;
+      position: relative;
     }
+
+    /* Horizontal scroll image strip per card */
     .pg-img {
-      overflow: hidden;
+      overflow-x: auto;
+      overflow-y: hidden;
       aspect-ratio: 4/3;
+      display: flex;
+      scrollbar-width: none;
+      position: relative;
+    }
+    .pg-img::-webkit-scrollbar { display: none; }
+    .pg-img-strip {
+      display: flex;
+      flex-shrink: 0;
+      height: 100%;
     }
     .pg-img img {
-      width: 100%; height: 100%;
+      height: 100%;
+      width: auto;
+      min-width: 100%;
       object-fit: cover;
+      flex-shrink: 0;
       transition: transform 0.6s var(--ease);
       display: block;
     }
-    .pg-card:hover .pg-img img { transform: scale(1.05); }
+    .pg-card:hover .pg-img img:first-child { transform: scale(1.03); }
+
+    /* scroll hint dots */
+    .pg-scroll-dots {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 5px;
+      pointer-events: none;
+    }
+    .pg-scroll-dot {
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.5);
+      transition: background 0.2s;
+    }
+    .pg-scroll-dot.active { background: rgba(255,255,255,0.95); }
+
+    /* Text overlay on hover */
+    .pg-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.1) 50%, transparent 100%);
+      opacity: 0;
+      transition: opacity 0.35s var(--ease);
+      pointer-events: none;
+    }
+    .pg-card:hover .pg-overlay { opacity: 1; }
+
+    .pg-overlay-text {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 16px 16px 14px;
+      color: #fff;
+      transform: translateY(6px);
+      transition: transform 0.35s var(--ease);
+      pointer-events: none;
+    }
+    .pg-card:hover .pg-overlay-text { transform: translateY(0); }
+    .pg-overlay-type {
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.7;
+      margin-bottom: 3px;
+    }
+    .pg-overlay-name {
+      font-family: var(--serif);
+      font-size: 1.05rem;
+      font-style: italic;
+    }
+
     .pg-info { padding: 14px 18px 18px; }
     .pg-type { font-size: 0.68rem; color: var(--grey); margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.08em; }
     .pg-name { font-family: var(--serif); font-size: 1.05rem; font-weight: 400; }
@@ -310,30 +398,151 @@
       object-fit: cover;
     }
 
-    /* ── MOBILE ───────────────────────────── */
+    /* ═══════════════════════════════════════
+       MOBILE — IMPROVED
+    ═══════════════════════════════════════ */
     @media (max-width: 768px) {
-      #page-home { flex-direction: column; height: auto; overflow: visible; }
-      .home-left { width: 100%; height: auto; overflow: visible; }
-      .home-right { height: 50vw; min-height: 260px; }
+      /* HOME: full-screen card swipe layout on mobile */
+      #page-home {
+        flex-direction: column;
+        height: auto;
+        overflow: visible;
+      }
+
+      /* On mobile hide the desktop left/right split */
+      .home-left { display: none; }
+      .home-right { display: none; }
+
+      /* Mobile project cards grid */
+      .mobile-home {
+        display: block;
+        padding-top: var(--nav);
+      }
+
+      .mobile-hero {
+        position: relative;
+        height: 70vw;
+        max-height: 420px;
+        overflow: hidden;
+        background: #111;
+      }
+      .mobile-hero img {
+        width: 100%; height: 100%;
+        object-fit: cover;
+      }
+      .mobile-hero-overlay {
+        position: absolute; inset: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 60%);
+      }
+      .mobile-hero-label {
+        position: absolute;
+        bottom: 20px; left: 20px;
+        color: #fff;
+      }
+      .mobile-hero-label-name {
+        font-family: var(--serif);
+        font-size: 1.5rem;
+        font-style: italic;
+        display: block;
+        line-height: 1.2;
+      }
+      .mobile-hero-label-sub {
+        font-size: 0.68rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        opacity: 0.7;
+        margin-top: 4px;
+        display: block;
+      }
+      .mobile-hero-counter {
+        position: absolute;
+        top: 16px; right: 16px;
+        font-size: 0.68rem;
+        color: rgba(255,255,255,0.5);
+        letter-spacing: 0.08em;
+      }
+
+      .mobile-projects-section {
+        padding: 28px 0 0;
+      }
+      .mobile-section-title {
+        font-size: 0.65rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--grey);
+        padding: 0 20px 14px;
+        border-bottom: 1px solid #e5e5e3;
+      }
+
+      /* Each project: image strip + info */
+      .mobile-proj-card {
+        border-bottom: 1px solid #e5e5e3;
+        cursor: pointer;
+      }
+      .mobile-proj-images {
+        display: flex;
+        overflow-x: auto;
+        scrollbar-width: none;
+        height: 52vw;
+        max-height: 280px;
+      }
+      .mobile-proj-images::-webkit-scrollbar { display: none; }
+      .mobile-proj-images img {
+        height: 100%;
+        width: auto;
+        min-width: 80vw;
+        object-fit: cover;
+        flex-shrink: 0;
+      }
+      .mobile-proj-info {
+        padding: 14px 20px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+      .mobile-proj-name {
+        font-family: var(--serif);
+        font-size: 1.2rem;
+        font-weight: 400;
+      }
+      .mobile-proj-meta {
+        font-size: 0.68rem;
+        color: var(--grey);
+        text-align: right;
+        flex-shrink: 0;
+        margin-left: 12px;
+      }
+
+      .mobile-footer {
+        padding: 24px 20px;
+        font-size: 0.72rem;
+        color: var(--grey);
+        display: flex;
+        justify-content: space-between;
+        border-top: 1px solid #e5e5e3;
+        margin-top: 8px;
+      }
+
+      /* projects page on mobile */
       .pg-grid { grid-template-columns: 1fr 1fr; }
       .about-inner { grid-template-columns: 1fr; }
       .about-img { height: 50vw; }
       .about-text { border-right: none; padding: 40px 24px; }
     }
+
     @media (max-width: 500px) {
       nav { padding: 0 18px; }
       .proj-item { padding: 12px 18px; }
       .pg-grid { grid-template-columns: 1fr; }
       .home-footer { padding: 20px 18px; }
+      .mobile-proj-images { height: 60vw; }
     }
 
-    .logo-img { width: 38px; height: 38px; object-fit: contain; flex-shrink: 0; transition: filter 0.3s; }
-    nav.light .logo-img { filter: brightness(0) invert(1); opacity: 0.88; }
-    .logo-words { display: flex; flex-direction: column; line-height: 1.15; }
-    .logo-words .logo-top { font-size: 0.6rem; font-weight: 300; letter-spacing: 0.26em; text-transform: uppercase; color: var(--grey); transition: color 0.3s; }
-    .logo-words .logo-bot { font-size: 0.85rem; font-weight: 400; letter-spacing: 0.04em; color: var(--black); transition: color 0.3s; }
-    nav.light .logo-words .logo-top, nav.light .logo-words .logo-bot { color: rgba(255,255,255,0.88); }
-    .nav-logo { display: flex; align-items: center; gap: 10px; }
+    /* hide mobile home on desktop */
+    .mobile-home { display: none; }
+    @media (max-width: 768px) {
+      .mobile-home { display: block; }
+    }
   </style>
 </head>
 <body>
@@ -341,7 +550,7 @@
   <!-- NAV -->
   <nav id="mainNav">
     <div class="nav-logo" onclick="showPage('home')">
-      <img class="logo-img" src="data:image/png;base64,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" alt="Studio Improvise" />
+      <img class="logo-img" src="data:image/png;base64,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" alt="Studio Improvise" />
       <div class="logo-words">
         <span class="logo-top">Studio</span>
         <span class="logo-bot">Improvise</span>
@@ -356,11 +565,11 @@
   </nav>
 
   <!-- ══════════════════════════════════
-       HOME
+       HOME — DESKTOP (split screen)
   ══════════════════════════════════ -->
   <div class="page active" id="page-home">
 
-    <!-- LEFT: list -->
+    <!-- LEFT: list (desktop only) -->
     <div class="home-left">
       <div class="proj-list-inner" id="projList">
 
@@ -467,7 +676,7 @@
       </div>
     </div>
 
-    <!-- RIGHT: images -->
+    <!-- RIGHT: hero images (desktop only) -->
     <div class="home-right" id="homeRight">
 
       <div class="hero-slide active" data-index="0">
@@ -526,6 +735,123 @@
       <div class="hero-counter" id="heroCounter">01 / 12</div>
 
     </div>
+
+    <!-- MOBILE HOME: full-image card feed -->
+    <div class="mobile-home" id="mobileHome">
+      <!-- Hero feature image (cycles) -->
+      <div class="mobile-hero" id="mobileHero">
+        <img id="mobileHeroImg" src="https://images.unsplash.com/photo-1600210492493-0946911123ea?w=900&q=80&fit=crop" alt="Featured project" />
+        <div class="mobile-hero-overlay"></div>
+        <div class="mobile-hero-label">
+          <span class="mobile-hero-label-name" id="mobileHeroName">SOIL Restaurant</span>
+          <span class="mobile-hero-label-sub" id="mobileHeroSub">Restaurant · Athens · 2022</span>
+        </div>
+        <div class="mobile-hero-counter" id="mobileHeroCounter">01 / 12</div>
+      </div>
+
+      <div class="mobile-projects-section">
+        <div class="mobile-section-title">Selected Work</div>
+
+        <!-- Each project card with horizontal scroll images -->
+        <div class="mobile-proj-card" onclick="showPage('projects')">
+          <div class="mobile-proj-images">
+            <img src="https://images.unsplash.com/photo-1600210492493-0946911123ea?w=700&q=80&fit=crop" alt="SOIL Restaurant" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=700&q=80&fit=crop" alt="SOIL Restaurant 2" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=700&q=80&fit=crop" alt="SOIL Restaurant 3" loading="lazy" />
+          </div>
+          <div class="mobile-proj-info">
+            <span class="mobile-proj-name">SOIL Restaurant</span>
+            <span class="mobile-proj-meta">Restaurant · 2022</span>
+          </div>
+        </div>
+
+        <div class="mobile-proj-card" onclick="showPage('projects')">
+          <div class="mobile-proj-images">
+            <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=700&q=80&fit=crop" alt="Urban Suites" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1615529182904-14819c35db37?w=700&q=80&fit=crop" alt="Urban Suites 2" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=700&q=80&fit=crop" alt="Urban Suites 3" loading="lazy" />
+          </div>
+          <div class="mobile-proj-info">
+            <span class="mobile-proj-name">Urban Suites</span>
+            <span class="mobile-proj-meta">Interior Arch. · 2021</span>
+          </div>
+        </div>
+
+        <div class="mobile-proj-card" onclick="showPage('projects')">
+          <div class="mobile-proj-images">
+            <img src="https://images.unsplash.com/photo-1615529182904-14819c35db37?w=700&q=80&fit=crop" alt="Urban Tropics" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=700&q=80&fit=crop" alt="Urban Tropics 2" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=700&q=80&fit=crop" alt="Urban Tropics 3" loading="lazy" />
+          </div>
+          <div class="mobile-proj-info">
+            <span class="mobile-proj-name">Urban Tropics</span>
+            <span class="mobile-proj-meta">Interior Design · 2021</span>
+          </div>
+        </div>
+
+        <div class="mobile-proj-card" onclick="showPage('projects')">
+          <div class="mobile-proj-images">
+            <img src="https://images.unsplash.com/photo-1613977257363-707ba9348227?w=700&q=80&fit=crop" alt="Aqua Villa" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=700&q=80&fit=crop" alt="Aqua Villa 2" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=700&q=80&fit=crop" alt="Aqua Villa 3" loading="lazy" />
+          </div>
+          <div class="mobile-proj-info">
+            <span class="mobile-proj-name">Aqua Villa</span>
+            <span class="mobile-proj-meta">Interior Design · 2020</span>
+          </div>
+        </div>
+
+        <div class="mobile-proj-card" onclick="showPage('projects')">
+          <div class="mobile-proj-images">
+            <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=700&q=80&fit=crop" alt="Alexandra's Desk" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=700&q=80&fit=crop" alt="Alexandra's Desk 2" loading="lazy" />
+          </div>
+          <div class="mobile-proj-info">
+            <span class="mobile-proj-name">Alexandra's Desk</span>
+            <span class="mobile-proj-meta">Residential · 2021</span>
+          </div>
+        </div>
+
+        <div class="mobile-proj-card" onclick="showPage('projects')">
+          <div class="mobile-proj-images">
+            <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=700&q=80&fit=crop" alt="V & G Law Office" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1629079447777-1e605162dc8d?w=700&q=80&fit=crop" alt="V & G Law Office 2" loading="lazy" />
+          </div>
+          <div class="mobile-proj-info">
+            <span class="mobile-proj-name">V &amp; G Law Office</span>
+            <span class="mobile-proj-meta">Commercial · 2020</span>
+          </div>
+        </div>
+
+        <div class="mobile-proj-card" onclick="showPage('projects')">
+          <div class="mobile-proj-images">
+            <img src="https://images.unsplash.com/photo-1629079447777-1e605162dc8d?w=700&q=80&fit=crop" alt="Dokou Dental" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1600210492493-0946911123ea?w=700&q=80&fit=crop" alt="Dokou Dental 2" loading="lazy" />
+          </div>
+          <div class="mobile-proj-info">
+            <span class="mobile-proj-name">Dokou Dental</span>
+            <span class="mobile-proj-meta">Interior Design · 2019</span>
+          </div>
+        </div>
+
+        <div class="mobile-proj-card" onclick="showPage('projects')">
+          <div class="mobile-proj-images">
+            <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=700&q=80&fit=crop" alt="Charlie's Cheesesteak" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=700&q=80&fit=crop" alt="Charlie's Cheesesteak 2" loading="lazy" />
+          </div>
+          <div class="mobile-proj-info">
+            <span class="mobile-proj-name">Charlie's Cheesesteak</span>
+            <span class="mobile-proj-meta">Restaurant · 2019</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="mobile-footer">
+        <span>Studio Improvise</span>
+        <span>Athens · Est. 2016</span>
+      </div>
+    </div>
   </div>
 
   <!-- ══════════════════════════════════
@@ -539,51 +865,196 @@
     <div class="pg-grid">
 
       <div class="pg-card">
-        <div class="pg-img"><img src="https://images.unsplash.com/photo-1600210492493-0946911123ea?w=800&q=80&fit=crop" alt="SOIL Restaurant" loading="lazy" /></div>
+        <div class="pg-img" style="position:relative">
+          <div class="pg-img-strip">
+            <img src="https://images.unsplash.com/photo-1600210492493-0946911123ea?w=800&q=80&fit=crop" alt="SOIL Restaurant" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80&fit=crop" alt="SOIL Restaurant 2" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=800&q=80&fit=crop" alt="SOIL Restaurant 3" loading="lazy" />
+          </div>
+          <div class="pg-overlay">
+            <div class="pg-overlay-text">
+              <div class="pg-overlay-type">Restaurant</div>
+              <div class="pg-overlay-name">SOIL Restaurant</div>
+            </div>
+          </div>
+        </div>
         <div class="pg-info"><div class="pg-type">Restaurant</div><div class="pg-name">SOIL Restaurant</div></div>
       </div>
+
       <div class="pg-card">
-        <div class="pg-img"><img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=80&fit=crop" alt="Urban Suites" loading="lazy" /></div>
+        <div class="pg-img" style="position:relative">
+          <div class="pg-img-strip">
+            <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=80&fit=crop" alt="Urban Suites" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1615529182904-14819c35db37?w=800&q=80&fit=crop" alt="Urban Suites 2" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80&fit=crop" alt="Urban Suites 3" loading="lazy" />
+          </div>
+          <div class="pg-overlay">
+            <div class="pg-overlay-text">
+              <div class="pg-overlay-type">Interior Architecture</div>
+              <div class="pg-overlay-name">Urban Suites</div>
+            </div>
+          </div>
+        </div>
         <div class="pg-info"><div class="pg-type">Interior Architecture</div><div class="pg-name">Urban Suites</div></div>
       </div>
+
       <div class="pg-card">
-        <div class="pg-img"><img src="https://images.unsplash.com/photo-1615529182904-14819c35db37?w=800&q=80&fit=crop" alt="Urban Tropics" loading="lazy" /></div>
+        <div class="pg-img" style="position:relative">
+          <div class="pg-img-strip">
+            <img src="https://images.unsplash.com/photo-1615529182904-14819c35db37?w=800&q=80&fit=crop" alt="Urban Tropics" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800&q=80&fit=crop" alt="Urban Tropics 2" loading="lazy" />
+          </div>
+          <div class="pg-overlay">
+            <div class="pg-overlay-text">
+              <div class="pg-overlay-type">Interior Design</div>
+              <div class="pg-overlay-name">Urban Tropics</div>
+            </div>
+          </div>
+        </div>
         <div class="pg-info"><div class="pg-type">Interior Design</div><div class="pg-name">Urban Tropics</div></div>
       </div>
+
       <div class="pg-card">
-        <div class="pg-img"><img src="https://images.unsplash.com/photo-1613977257363-707ba9348227?w=800&q=80&fit=crop" alt="Aqua Villa" loading="lazy" /></div>
+        <div class="pg-img" style="position:relative">
+          <div class="pg-img-strip">
+            <img src="https://images.unsplash.com/photo-1613977257363-707ba9348227?w=800&q=80&fit=crop" alt="Aqua Villa" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80&fit=crop" alt="Aqua Villa 2" loading="lazy" />
+          </div>
+          <div class="pg-overlay">
+            <div class="pg-overlay-text">
+              <div class="pg-overlay-type">Interior Design</div>
+              <div class="pg-overlay-name">Aqua Villa</div>
+            </div>
+          </div>
+        </div>
         <div class="pg-info"><div class="pg-type">Interior Design</div><div class="pg-name">Aqua Villa</div></div>
       </div>
+
       <div class="pg-card">
-        <div class="pg-img"><img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80&fit=crop" alt="Alexandra's Desk" loading="lazy" /></div>
+        <div class="pg-img" style="position:relative">
+          <div class="pg-img-strip">
+            <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80&fit=crop" alt="Alexandra's Desk" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80&fit=crop" alt="Alexandra's Desk 2" loading="lazy" />
+          </div>
+          <div class="pg-overlay">
+            <div class="pg-overlay-text">
+              <div class="pg-overlay-type">Residential</div>
+              <div class="pg-overlay-name">Alexandra's Desk</div>
+            </div>
+          </div>
+        </div>
         <div class="pg-info"><div class="pg-type">Residential</div><div class="pg-name">Alexandra's Desk</div></div>
       </div>
+
       <div class="pg-card">
-        <div class="pg-img"><img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80&fit=crop" alt="V & G Law Office" loading="lazy" /></div>
+        <div class="pg-img" style="position:relative">
+          <div class="pg-img-strip">
+            <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80&fit=crop" alt="V & G Law Office" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1629079447777-1e605162dc8d?w=800&q=80&fit=crop" alt="V & G Law Office 2" loading="lazy" />
+          </div>
+          <div class="pg-overlay">
+            <div class="pg-overlay-text">
+              <div class="pg-overlay-type">Commercial</div>
+              <div class="pg-overlay-name">V &amp; G Law Office</div>
+            </div>
+          </div>
+        </div>
         <div class="pg-info"><div class="pg-type">Commercial</div><div class="pg-name">V &amp; G Law Office</div></div>
       </div>
+
       <div class="pg-card">
-        <div class="pg-img"><img src="https://images.unsplash.com/photo-1629079447777-1e605162dc8d?w=800&q=80&fit=crop" alt="Dokou Dental" loading="lazy" /></div>
+        <div class="pg-img" style="position:relative">
+          <div class="pg-img-strip">
+            <img src="https://images.unsplash.com/photo-1629079447777-1e605162dc8d?w=800&q=80&fit=crop" alt="Dokou Dental" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1600210492493-0946911123ea?w=800&q=80&fit=crop" alt="Dokou Dental 2" loading="lazy" />
+          </div>
+          <div class="pg-overlay">
+            <div class="pg-overlay-text">
+              <div class="pg-overlay-type">Interior Design</div>
+              <div class="pg-overlay-name">Dokou Dental</div>
+            </div>
+          </div>
+        </div>
         <div class="pg-info"><div class="pg-type">Interior Design</div><div class="pg-name">Dokou Dental</div></div>
       </div>
+
       <div class="pg-card">
-        <div class="pg-img"><img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80&fit=crop" alt="Charlie's Cheesesteak" loading="lazy" /></div>
+        <div class="pg-img" style="position:relative">
+          <div class="pg-img-strip">
+            <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80&fit=crop" alt="Charlie's Cheesesteak" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=800&q=80&fit=crop" alt="Charlie's Cheesesteak 2" loading="lazy" />
+          </div>
+          <div class="pg-overlay">
+            <div class="pg-overlay-text">
+              <div class="pg-overlay-type">Restaurant</div>
+              <div class="pg-overlay-name">Charlie's Cheesesteak</div>
+            </div>
+          </div>
+        </div>
         <div class="pg-info"><div class="pg-type">Restaurant</div><div class="pg-name">Charlie's Cheesesteak</div></div>
       </div>
+
       <div class="pg-card">
-        <div class="pg-img"><img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=800&q=80&fit=crop" alt="TerraMare" loading="lazy" /></div>
+        <div class="pg-img" style="position:relative">
+          <div class="pg-img-strip">
+            <img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=800&q=80&fit=crop" alt="TerraMare" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1615529182904-14819c35db37?w=800&q=80&fit=crop" alt="TerraMare 2" loading="lazy" />
+          </div>
+          <div class="pg-overlay">
+            <div class="pg-overlay-text">
+              <div class="pg-overlay-type">Styling</div>
+              <div class="pg-overlay-name">TerraMare</div>
+            </div>
+          </div>
+        </div>
         <div class="pg-info"><div class="pg-type">Styling</div><div class="pg-name">TerraMare</div></div>
       </div>
+
       <div class="pg-card">
-        <div class="pg-img"><img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80&fit=crop" alt="Colour Links" loading="lazy" /></div>
+        <div class="pg-img" style="position:relative">
+          <div class="pg-img-strip">
+            <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80&fit=crop" alt="Colour Links" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1613977257363-707ba9348227?w=800&q=80&fit=crop" alt="Colour Links 2" loading="lazy" />
+          </div>
+          <div class="pg-overlay">
+            <div class="pg-overlay-text">
+              <div class="pg-overlay-type">Interior Design</div>
+              <div class="pg-overlay-name">Colour Links</div>
+            </div>
+          </div>
+        </div>
         <div class="pg-info"><div class="pg-type">Interior Design</div><div class="pg-name">Colour Links</div></div>
       </div>
+
       <div class="pg-card">
-        <div class="pg-img"><img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80&fit=crop" alt="Balancing Old & New" loading="lazy" /></div>
+        <div class="pg-img" style="position:relative">
+          <div class="pg-img-strip">
+            <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80&fit=crop" alt="Balancing Old & New" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80&fit=crop" alt="Balancing Old & New 2" loading="lazy" />
+          </div>
+          <div class="pg-overlay">
+            <div class="pg-overlay-text">
+              <div class="pg-overlay-type">Interior Design</div>
+              <div class="pg-overlay-name">Balancing Old &amp; New</div>
+            </div>
+          </div>
+        </div>
         <div class="pg-info"><div class="pg-type">Interior Design</div><div class="pg-name">Balancing Old &amp; New</div></div>
       </div>
+
       <div class="pg-card">
-        <div class="pg-img"><img src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800&q=80&fit=crop" alt="BM.NB.VS" loading="lazy" /></div>
+        <div class="pg-img" style="position:relative">
+          <div class="pg-img-strip">
+            <img src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800&q=80&fit=crop" alt="BM.NB.VS" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=80&fit=crop" alt="BM.NB.VS 2" loading="lazy" />
+          </div>
+          <div class="pg-overlay">
+            <div class="pg-overlay-text">
+              <div class="pg-overlay-type">Research</div>
+              <div class="pg-overlay-name">BM.NB.VS: Three Utopias</div>
+            </div>
+          </div>
+        </div>
         <div class="pg-info"><div class="pg-type">Research</div><div class="pg-name">BM.NB.VS: Three Utopias</div></div>
       </div>
 
@@ -614,7 +1085,7 @@
           Daphne graduated from the Glasgow School of Art with a Master's in Interior Design in 2015. She is currently based in Athens.
         </p>
         <div class="about-contacts">
-          <a href="/cdn-cgi/l/email-protection#1378727f727772637b7d763d7776607a747d53747e727a7f3d707c7e"><span class="__cf_email__" data-cfemail="bfd4ded3dedbdecfd7d1da91dbdaccd6d8d1ffd8d2ded6d391dcd0d2">[email&#160;protected]</span></a>
+          <a href="mailto:info@studioimprovise.com">info@studioimprovise.com</a>
           <a href="tel:+306977780716">+30 697 778 0716</a>
         </div>
         <div class="about-socials">
@@ -629,20 +1100,20 @@
     </div>
   </div>
 
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  <script>
     const projects = [
-      { name: 'SOIL Restaurant',        type: 'Restaurant · Athens',          year: '2022' },
-      { name: 'Urban Suites',           type: 'Interior Architecture · Athens', year: '2021' },
-      { name: 'Urban Tropics',          type: 'Interior Design · Athens',      year: '2021' },
-      { name: 'Aqua Villa',             type: 'Interior Design · Greece',       year: '2020' },
-      { name: "Alexandra's Desk",       type: 'Residential · Athens',           year: '2021' },
-      { name: 'V & G Law Office',       type: 'Commercial · Athens',            year: '2020' },
-      { name: 'Dokou Dental',           type: 'Interior Design · Athens',       year: '2019' },
-      { name: "Charlie's Cheesesteak",  type: 'Restaurant · Athens',            year: '2019' },
-      { name: 'TerraMare',              type: 'Styling · Greece',               year: '2020' },
-      { name: 'Colour Links',           type: 'Interior Design · Athens',       year: '2019' },
-      { name: 'Balancing Old & New',    type: 'Interior Design · Athens',       year: '2018' },
-      { name: 'BM.NB.VS: Three Utopias', type: 'Research',                     year: '2017' },
+      { name: 'SOIL Restaurant',          type: 'Restaurant · Athens',            year: '2022', img: 'https://images.unsplash.com/photo-1600210492493-0946911123ea?w=900&q=80&fit=crop' },
+      { name: 'Urban Suites',             type: 'Interior Architecture · Athens', year: '2021', img: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=900&q=80&fit=crop' },
+      { name: 'Urban Tropics',            type: 'Interior Design · Athens',       year: '2021', img: 'https://images.unsplash.com/photo-1615529182904-14819c35db37?w=900&q=80&fit=crop' },
+      { name: 'Aqua Villa',               type: 'Interior Design · Greece',       year: '2020', img: 'https://images.unsplash.com/photo-1613977257363-707ba9348227?w=900&q=80&fit=crop' },
+      { name: "Alexandra's Desk",         type: 'Residential · Athens',           year: '2021', img: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=900&q=80&fit=crop' },
+      { name: 'V & G Law Office',         type: 'Commercial · Athens',            year: '2020', img: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=900&q=80&fit=crop' },
+      { name: 'Dokou Dental',             type: 'Interior Design · Athens',       year: '2019', img: 'https://images.unsplash.com/photo-1629079447777-1e605162dc8d?w=900&q=80&fit=crop' },
+      { name: "Charlie's Cheesesteak",    type: 'Restaurant · Athens',            year: '2019', img: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=900&q=80&fit=crop' },
+      { name: 'TerraMare',                type: 'Styling · Greece',               year: '2020', img: 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=900&q=80&fit=crop' },
+      { name: 'Colour Links',             type: 'Interior Design · Athens',       year: '2019', img: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=900&q=80&fit=crop' },
+      { name: 'Balancing Old & New',      type: 'Interior Design · Athens',       year: '2018', img: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=900&q=80&fit=crop' },
+      { name: 'BM.NB.VS: Three Utopias', type: 'Research',                       year: '2017', img: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=900&q=80&fit=crop' },
     ];
 
     // ── Page switching ───────────────────────
@@ -653,14 +1124,13 @@
       const nl = document.getElementById('nl-' + id);
       if (nl) nl.classList.add('active');
       window.scrollTo(0, 0);
-      // light nav only on home
       document.getElementById('mainNav').classList.toggle('light', id === 'home');
     }
 
     // set initial nav state
     document.getElementById('mainNav').classList.add('light');
 
-    // ── Hover: switch image ──────────────────
+    // ── Desktop: Hover switch image ──────────────────
     let currentIndex = 0;
     const slides = document.querySelectorAll('.hero-slide');
     const items  = document.querySelectorAll('.proj-item');
@@ -670,28 +1140,86 @@
 
     function activateProject(index) {
       if (index === currentIndex) return;
-      // deactivate old
       slides[currentIndex].classList.remove('active');
       items[currentIndex].classList.remove('active-item');
-      // activate new
       currentIndex = index;
       slides[currentIndex].classList.add('active');
       items[currentIndex].classList.add('active-item');
-      // update label
       const p = projects[index];
       labelName.textContent = p.name;
       labelType.textContent = p.type + ' · ' + p.year;
       counter.textContent = String(index + 1).padStart(2, '0') + ' / ' + String(projects.length).padStart(2, '0');
+      // scroll the left panel to keep active item visible
+      const activeItem = items[index];
+      activeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     items.forEach((item, i) => {
       item.addEventListener('mouseenter', () => activateProject(i));
     });
 
-    // ── Auto-cycle when not hovering ─────────
+    // ── Auto-cycle: cycle AND auto-scroll left panel ─────────
     let autoTimer;
     const homeLeft = document.querySelector('.home-left');
+    let isHovering = false;
 
     function startAuto() {
+      stopAuto();
       autoTimer = setInterval(() => {
-        activateProject((currentIndex
+        const next = (currentIndex + 1) % projects.length;
+        activateProject(next);
+      }, 3000);
+    }
+
+    function stopAuto() {
+      clearInterval(autoTimer);
+    }
+
+    // stop auto on hover, restart on leave
+    const homeEl = document.getElementById('page-home');
+    if (homeLeft) {
+      homeLeft.addEventListener('mouseenter', () => { isHovering = true; stopAuto(); });
+      homeLeft.addEventListener('mouseleave', () => { isHovering = false; startAuto(); });
+    }
+
+    startAuto();
+
+    // ── Mobile hero cycling ──────────────────
+    let mobileIndex = 0;
+    const mobileHeroImg = document.getElementById('mobileHeroImg');
+    const mobileHeroName = document.getElementById('mobileHeroName');
+    const mobileHeroSub = document.getElementById('mobileHeroSub');
+    const mobileHeroCounter = document.getElementById('mobileHeroCounter');
+
+    function updateMobileHero(index) {
+      const p = projects[index];
+      if (mobileHeroImg) {
+        mobileHeroImg.style.opacity = '0';
+        mobileHeroImg.style.transition = 'opacity 0.6s ease';
+        setTimeout(() => {
+          mobileHeroImg.src = p.img;
+          mobileHeroImg.style.opacity = '1';
+        }, 300);
+        mobileHeroName.textContent = p.name;
+        mobileHeroSub.textContent = p.type + ' · ' + p.year;
+        mobileHeroCounter.textContent = String(index + 1).padStart(2, '0') + ' / ' + String(projects.length).padStart(2, '0');
+      }
+    }
+
+    // Tap mobile hero to advance
+    const mobileHeroEl = document.getElementById('mobileHero');
+    if (mobileHeroEl) {
+      mobileHeroEl.addEventListener('click', () => {
+        mobileIndex = (mobileIndex + 1) % projects.length;
+        updateMobileHero(mobileIndex);
+      });
+    }
+
+    setInterval(() => {
+      mobileIndex = (mobileIndex + 1) % projects.length;
+      updateMobileHero(mobileIndex);
+    }, 4000);
+
+  </script>
+</body>
+</html>
